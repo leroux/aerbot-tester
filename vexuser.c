@@ -150,7 +150,8 @@ vexOperator( void *arg )
 		{
 
 		// set motor
-		vexMotorSet(1 , vexControllerGet(Btn6U) );
+		vexMotorSet(1 , vexControllerGet(Btn6U) ); // may or maynot work with CIM motors
+		//vexDigitalPinSet(1, vexControllerGet(Btn6U) ); possible alternative
 
 
 		// Don't hog cpu

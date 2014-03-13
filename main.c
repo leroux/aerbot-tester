@@ -64,63 +64,60 @@ static const ShellCommand commands[] = {
   {"son",     vexSonarDebug},
   {"ime",     vexIMEDebug},
   {"test",    vexTestDebug},
-   {NULL, NULL}
+  {NULL, NULL}
 };
 
 // configuration for the shell
 static const ShellConfig shell_cfg1 = {
   (vexStream *)SD_CONSOLE,
-   commands
+  commands
 };
 
 /*-----------------------------------------------------------------------------*/
-//  Application entry point.											       */
+//  Application entry point.                             */
 /*-----------------------------------------------------------------------------*/
 
-int main(void)
-{
-	Thread *shelltp = NULL;
-	short	timeout = 0;
+int main(void) {
+  Thread *shelltp = NULL;
+  short timeout = 0;
 
-	// System initializations.
-    // - HAL initialization, this also initializes the configured device drivers
-    //   and performs the board-specific initializations.
-    // - Kernel initialization, the main() function becomes a thread and the
-    //   RTOS is active.
-	halInit();
-	chSysInit();
+  // System initializations.
+  // - HAL initialization, this also initializes the configured device drivers
+  //   and performs the board-specific initializations.
+  // - Kernel initialization, the main() function becomes a thread and the
+  //   RTOS is active.
+  halInit();
+  chSysInit();
 
-	// Init the serial port associated with the console
-	vexConsoleInit();
+  // Init the serial port associated with the console
+  vexConsoleInit();
 
-    // init VEX
-    vexCortexInit();
+  // init VEX
+  vexCortexInit();
 
-    // wait for good spi comms
-    while( vexSpiGetOnlineStatus() == 0 )
-    	{
-        // wait for a while
-        chThdSleepMilliseconds(100);
-        // dump after 5 seconds
-        if(timeout++ == 50)
-        	break;
-    	}
+  // wait for good spi comms
+  while (vexSpiGetOnlineStatus() == 0) {
+    // wait for a while
+    chThdSleepMilliseconds(100);
 
-    // Shell manager initialization.
-    shellInit();
+    // dump after 5 seconds
+    if (timeout++ == 50) {
+      break;
+    }
+  }
 
-    // spin in loop monitoring the shell
-    while (TRUE)
-    	{
-	    if (!shelltp)
-	    	shelltp = shellCreate(&shell_cfg1, SHELL_WA_SIZE, NORMALPRIO);
-	    else
-	    if (chThdTerminated(shelltp))
-	    	{
-	        chThdRelease(shelltp);    /* Recovers memory of the previous shell.   */
-	        shelltp = NULL;           /* Triggers spawning of a new shell.        */
-	        }
+  // Shell manager initialization.
+  shellInit();
 
-	    chThdSleepMilliseconds(50);
-    	}
+  // spin in loop monitoring the shell
+  while (TRUE) {
+    if (!shelltp) {
+      shelltp = shellCreate(&shell_cfg1, SHELL_WA_SIZE, NORMALPRIO);
+    } else if (chThdTerminated(shelltp)) {
+      chThdRelease(shelltp);    /* Recovers memory of the previous shell.   */
+      shelltp = NULL;           /* Triggers spawning of a new shell.        */
+    }
+
+    chThdSleepMilliseconds(50);
+  }
 }

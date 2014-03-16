@@ -65,17 +65,7 @@ cmd_apollo(vexStream *chp,int argc, char *argv[]){
   while(sdGetWouldBlock((SerialDriver *)chp)){
     apolloUpdate();
   }
-  apolloDeInit();
-}
-
-static void
-cmd_sm(vexStream *chp, int argc, char *argv[]){
-  //prevent unused warning
-  (void)chp;
-  (void)argc;
-  (void)argv;
-
-  smartMotorDebugStatus();
+  apolloDeinit();
 }
 
 #define SHELL_WA_SIZE   THD_WA_SIZE(512)
@@ -90,7 +80,6 @@ static const ShellCommand commands[] = {
   {"son",     vexSonarDebug},
   {"ime",     vexIMEDebug},
   {"test",    vexTestDebug},
-  {"sm", cmd_sm},
   {"apollo", cmd_apollo},
   {NULL, NULL}
 };

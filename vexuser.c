@@ -94,6 +94,6 @@ void setShooter(int s) {
 
 // sets the pneumatic relay to on or off
 void setPneumatic(int value){
-  vexDigitalPinSet(relay, value ? kVexDigitalHigh : kVexDigitalLow);
+  vexDigitalPinSet(relay, value);
   pneumaticUp = value == kVexDigitalHigh;
 }

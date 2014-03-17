@@ -83,12 +83,8 @@ msg_t vexOperator(void *arg) {
       setPneumatic(pneumaticUp ? kVexDigitalLow : kVexDigitalHigh);
     buttonPressed = vexControllerGet(Btn5U);
 
-    //toggle shooter
-    if(!togglePressed && vexControllerGet(Btn6D))
-      alternateMotor();
-    togglePressed = vexControllerGet(Btn6D);
 
-    vexSleep(50);// prevent threads from starving
+    vexSleep(50);//don't starve other threads
   }
 
   return (msg_t)0;

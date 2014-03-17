@@ -66,17 +66,16 @@ msg_t vexOperator(void *arg) {
   vexTaskRegister("operator");
 
   int buttonPressed = 0;
-  int togglePressed = 0;
 
   while (!chThdShouldTerminate()) {
     // Btn6U will turn the motors to full speed
-    /*if (vexControllerGet(Btn6U))
+    if (vexControllerGet(Btn6U))
       setShooter(127);
     else if(abs(vexControllerGet(Ch3)) < 15)
       // deadzone
       setShooter(0);
     else
-      setShooter(vexControllerGet(Ch3));// joystick value directly goes to the motors*/
+      setShooter(vexControllerGet(Ch3));// joystick value directly goes to the motors
 
     // toggle pneumatic
     if(!buttonPressed && vexControllerGet(Btn5U))

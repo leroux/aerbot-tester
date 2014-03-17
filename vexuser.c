@@ -81,7 +81,7 @@ msg_t vexOperator(void *arg) {
       setPneumatic(pneumaticUp ? kVexDigitalLow : kVexDigitalHigh);
     buttonPressed = vexControllerGet(Btn5U);
 
-    vexSleep(300);// prevent threads from starving
+    vexSleep(50);//don't starve other threads
   }
 
   return (msg_t)0;

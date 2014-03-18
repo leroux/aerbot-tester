@@ -72,6 +72,12 @@ msg_t vexOperator(void *arg) {
       setShooter(motorOn ? 0 : 127);
     buttonPressed = vexControllerGet(Btn8U);
 
+    //joystick motor control
+    if(abs(vexControllerGet(Ch3)) > 15)
+      setShooter(vexControllerGet(Ch3));
+    else if(vexControllerGet(Btn7U))
+      setShooter(0);
+
     // pressing button 6D will result in the pneumatic going up
     setPneumatic(vexControllerGet(Btn6D) ? kVexDigitalHigh : kVexDigitalLow);
 

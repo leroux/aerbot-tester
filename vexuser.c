@@ -6,7 +6,7 @@
 
 void setShooter(int s);
 void setPneumatic(int value);
-int pneumaticUp;
+int motorOn;
 
 static vexDigiCfg dConfig[kVexDigital_Num] = {
   { kVexDigital_1,    kVexSensorDigitalOutput, kVexConfigOutput,      0 },
@@ -67,21 +67,15 @@ msg_t vexOperator(void *arg) {
   int buttonPressed = 0;
 
   while (!chThdShouldTerminate()) {
-    // Btn6U will turn the motors to full speed
-    if (vexControllerGet(Btn6U))
-      setShooter(127);
-    else if(abs(vexControllerGet(Ch3)) < 15)
-      // deadzone
-      setShooter(0);
-    else
-      setShooter(vexControllerGet(Ch3));// joystick value directly goes to the motors
+    //toggle shooter motor
+    if(!buttonPressed && vexControllerGet(Btn8U))
+      setShooter(motorOn ? 0 : 127);
+    buttonPressed = vexControllerGet(Btn8U);
 
-    // toggle pneumatic
-    if(!buttonPressed && vexControllerGet(Btn5U))
-      setPneumatic(pneumaticUp ? kVexDigitalLow : kVexDigitalHigh);
-    buttonPressed = vexControllerGet(Btn5U);
+    // pressing button 6D will result in the pneumatic going up
+    setPneumatic(vexControllerGet(Btn6D) ? kVexDigitalHigh : kVexDigitalLow);
 
-    vexSleep(50);//don't starve other threads
+    vexSleep(20);//don't starve other threads
   }
 
   return (msg_t)0;
@@ -90,10 +84,10 @@ msg_t vexOperator(void *arg) {
 void setShooter(int s) {
   vexMotorSet(shooterLeft, s);
   vexMotorSet(shooterRight, s);
+  motorOn = s == 127;
 }
 
 // sets the pneumatic relay to on or off
 void setPneumatic(int value){
   vexDigitalPinSet(relay, value);
-  pneumaticUp = value == kVexDigitalHigh;
 }

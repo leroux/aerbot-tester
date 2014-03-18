@@ -36,7 +36,7 @@ static vexMotorCfg mConfig[kVexMotorNum] = {
   { kVexMotor_10,     kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 }
 };
 
-#define shooterLeft kVexMotor_1
+#define shooterLeft kVexMotor_3
 #define shooterRight kVexMotor_2
 #define relay kVexDigital_1
 

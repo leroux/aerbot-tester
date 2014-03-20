@@ -38,6 +38,7 @@ static vexMotorCfg mConfig[kVexMotorNum] = {
 
 #define shooterLeft kVexMotor_3
 #define shooterRight kVexMotor_2
+#define intakeMotor kVexMotor_4
 #define relay kVexDigital_1
 
 void vexUserSetup() {
@@ -81,6 +82,12 @@ msg_t vexOperator(void *arg) {
     // pressing button 6D will result in the pneumatic going up
     setPneumatic(vexControllerGet(Btn6D) ? kVexDigitalHigh : kVexDigitalLow);
 
+    //intake is controlled with a joystick
+    if(abs(vexControllerGet(Ch2)) <= 15)
+      setIntake(0);//deadzone
+    else
+      setIntake(vexControllerGet(Ch2));
+
     vexSleep(20);//don't starve other threads
   }
 
@@ -91,6 +98,10 @@ void setShooter(int s) {
   vexMotorSet(shooterLeft, s);
   vexMotorSet(shooterRight, s);
   motorOn = s == 127;
+}
+
+void setIntake(int speed){
+  vexMotorSet(intakeMotor, speed);
 }
 
 // sets the pneumatic relay to on or off

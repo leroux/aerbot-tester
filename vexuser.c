@@ -5,6 +5,7 @@
 #include "vex.h"    // vex library header
 
 void setShooter(int s);
+void setIntake(int speed);
 void setPneumatic(int value);
 int motorOn;
 

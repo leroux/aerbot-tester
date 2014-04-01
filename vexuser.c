@@ -49,29 +49,6 @@ void vexUserInit() {
   // ...
 }
 
-task vexAutonomous(void *arg) {
-  (void)arg;
-  vexTaskRegister("auton");
-
-  while (!chThdShouldTerminate())
-    vexSleep(25);
-
-  return (msg_t)0;
-}
-
-task vexOperator(void *arg) {
-  (void)arg;
-  vexTaskRegister("operator");
-
-  StartTask(shooterTask);
-  StartTask(intakeTask);
-
-  while (!chThdShouldTerminate())
-    vexSleep(25);
-
-  return (msg_t)0;
-}
-
 task shooterTask(void *arg) {
   (void)arg;
   vexTaskRegister("shooter");
@@ -119,6 +96,29 @@ task intakeTask(void *arg) {
 
     vexSleep(25);
   }
+
+  return (msg_t)0;
+}
+
+task vexAutonomous(void *arg) {
+  (void)arg;
+  vexTaskRegister("auton");
+
+  while (!chThdShouldTerminate())
+    vexSleep(25);
+
+  return (msg_t)0;
+}
+
+task vexOperator(void *arg) {
+  (void)arg;
+  vexTaskRegister("operator");
+
+  StartTask(shooterTask);
+  StartTask(intakeTask);
+
+  while (!chThdShouldTerminate())
+    vexSleep(25);
 
   return (msg_t)0;
 }

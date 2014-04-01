@@ -4,11 +4,6 @@
 #include "hal.h"    // hardware abstraction layer header
 #include "vex.h"    // vex library header
 
-
-void setIntake(int speed);
-void setPneumatic(int value);
-void setArm(int value);
-
 static vexDigiCfg dConfig[kVexDigital_Num] = {
   { kVexDigital_1,    kVexSensorDigitalOutput, kVexConfigOutput,      0 },
   { kVexDigital_2,    kVexSensorDigitalOutput, kVexConfigOutput,      0 },

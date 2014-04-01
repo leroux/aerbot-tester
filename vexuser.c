@@ -3,6 +3,7 @@
 #include "ch.h"     // needs for all ChibiOS programs
 #include "hal.h"    // hardware abstraction layer header
 #include "vex.h"    // vex library header
+#include "robotc_glue.h"
 
 static vexDigiCfg dConfig[kVexDigital_Num] = {
   { kVexDigital_1,    kVexSensorDigitalOutput, kVexConfigOutput,      0 },
@@ -48,20 +49,9 @@ void vexUserInit() {
   // ...
 }
 
-msg_t vexAutonomous(void *arg) {
+task vexAutonomous(void *arg) {
   (void)arg;
   vexTaskRegister("auton");
-
-  while (1) {
-    vexSleep(25);
-  }
-
-  return (msg_t)0;
-}
-
-msg_t vexOperator(void *arg) {
-  (void)arg;
-  vexTaskRegister("operator");
 
   while (!chThdShouldTerminate())
     vexSleep(25);
@@ -69,7 +59,20 @@ msg_t vexOperator(void *arg) {
   return (msg_t)0;
 }
 
-msg_t shooterTask(void *arg) {
+task vexOperator(void *arg) {
+  (void)arg;
+  vexTaskRegister("operator");
+
+  StartTask(shooterTask);
+  StartTask(intakeTask);
+
+  while (!chThdShouldTerminate())
+    vexSleep(25);
+
+  return (msg_t)0;
+}
+
+task shooterTask(void *arg) {
   (void)arg;
   vexTaskRegister("shooter");
 
@@ -86,9 +89,8 @@ msg_t shooterTask(void *arg) {
     }
 
     // toggle shooter pneumatic arm
-    if(!shooterArmToggled && vexControllerGet(Btn6D)){
+    if(!shooterArmToggled && vexControllerGet(Btn6D))
       vexDigitalPinSet(shooterArm, 1 - vexDigitalPinGet(shooterArm));
-    }
     shooterArmToggled = vexControllerGet(Btn6D);
 
     vexSleep(25);
@@ -97,7 +99,7 @@ msg_t shooterTask(void *arg) {
   return (msg_t)0;
 }
 
-msg_t intakeTask(void *arg) {
+task intakeTask(void *arg) {
   (void)arg;
   vexTaskRegister("intake");
 
@@ -110,10 +112,9 @@ msg_t intakeTask(void *arg) {
     else
       vexMotorSet(intakeMotor, 0);
 
-    // toggle intake pneumatic
-    if(!intakeArmToggled && vexControllerGet(Btn6U)){
+    // toggle intake pneumatic arm
+    if(!intakeArmToggled && vexControllerGet(Btn6U))
       vexDigitalPinSet(intakeArm, 1 - vexDigitalPinGet(intakeArm));
-    }
     intakeArmToggled = vexControllerGet(Btn6U);
 
     vexSleep(25);

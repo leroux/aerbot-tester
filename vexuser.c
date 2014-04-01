@@ -4,13 +4,10 @@
 #include "hal.h"    // hardware abstraction layer header
 #include "vex.h"    // vex library header
 
-void setShooter(int s);
+
 void setIntake(int speed);
 void setPneumatic(int value);
 void setArm(int value);
-int motorOn;
-int intakeUp;
-int shooting;
 
 static vexDigiCfg dConfig[kVexDigital_Num] = {
   { kVexDigital_1,    kVexSensorDigitalOutput, kVexConfigOutput,      0 },
@@ -27,6 +24,9 @@ static vexDigiCfg dConfig[kVexDigital_Num] = {
   { kVexDigital_12,   kVexSensorDigitalInput,  kVexConfigInput,       0 }
 };
 
+#define shooterArm kVexDigital_1
+#define intakeArm kVexDigital_2
+
 static vexMotorCfg mConfig[kVexMotorNum] = {
   { kVexMotor_1,      kVexMotorUndefined,      kVexMotorReversed,     kVexSensorNone,        0 },
   { kVexMotor_2,      kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 },
@@ -40,11 +40,9 @@ static vexMotorCfg mConfig[kVexMotorNum] = {
   { kVexMotor_10,     kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 }
 };
 
-#define shooterLeft kVexMotor_3
-#define shooterRight kVexMotor_2
+#define shooterLeftMotor kVexMotor_3
+#define shooterRightMotor kVexMotor_2
 #define intakeMotor kVexMotor_4
-#define relay kVexDigital_1
-#define arm kVexDigital_2
 
 void vexUserSetup() {
   vexDigitalConfigure(dConfig, DIG_CONFIG_SIZE(dConfig));
@@ -70,63 +68,61 @@ msg_t vexOperator(void *arg) {
   (void)arg;
   vexTaskRegister("operator");
 
-  int buttonPressed = 0;
-  int armPress = 0;
-  int shotPress = 0;
+  while (!chThdShouldTerminate())
+    vexSleep(25);
+
+  return (msg_t)0;
+}
+
+msg_t shooterTask(void *arg) {
+  (void)arg;
+  vexTaskRegister("shooter");
+
+  int shooterArmToggled = 0;
 
   while (!chThdShouldTerminate()) {
-    //toggle shooter motor
-    if(!buttonPressed && vexControllerGet(Btn8U))
-      setShooter(motorOn ? 0 : 127);
-    buttonPressed = vexControllerGet(Btn8U);
-
-    //joystick motor control
-    if(abs(vexControllerGet(Ch3)) > 15)
-      setShooter(vexControllerGet(Ch3));
-    else if(vexControllerGet(Btn7U))
-      setShooter(0);
-
-    // toggle shooter pneumatic
-    if(!shotPress && vexControllerGet(Btn6D))
-      setPneumatic(shooting ?  kVexDigitalLow : kVexDigitalHigh);
-    shotPress = vexControllerGet(Btn6D);
-
-    //intake is controlled with a joystick
-    if(abs(vexControllerGet(Ch2)) <= 15)
-      setIntake(0);//deadzone
-    else
-      setIntake(vexControllerGet(Ch2));
-
-    //toggle intake pneumatic
-    if(!armPress && vexControllerGet(Btn6U)){
-      setArm(intakeUp ? kVexDigitalLow : kVexDigitalHigh);
-      intakeUp = !intakeUp;
+    // shooter motor
+    if (abs(vexControllerGet(Ch3)) > 15) {
+      vexMotorSet(shooterLeftMotor, vexControllerGet(Ch3));
+      vexMotorSet(shooterRightMotor, vexControllerGet(Ch3));
+    } else {
+      vexMotorSet(shooterLeftMotor, 0);
+      vexMotorSet(shooterRightMotor, 0);
     }
-    armPress = vexControllerGet(Btn6U);
 
-    vexSleep(20);//don't starve other threads
+    // toggle shooter pneumatic arm
+    if(!shooterArmToggled && vexControllerGet(Btn6D)){
+      vexDigitalPinSet(shooterArm, 1 - vexDigitalPinGet(shooterArm));
+    }
+    shooterArmToggled = vexControllerGet(Btn6D);
+
+    vexSleep(25);
   }
 
   return (msg_t)0;
 }
 
-void setShooter(int s) {
-  vexMotorSet(shooterLeft, s);
-  vexMotorSet(shooterRight, s);
-  motorOn = s == 127;
-}
+msg_t intakeTask(void *arg) {
+  (void)arg;
+  vexTaskRegister("intake");
 
-void setIntake(int speed){
-  vexMotorSet(intakeMotor, speed);
-}
+  int intakeArmToggled = 0;
 
-// sets the pneumatic relay to on or off
-void setPneumatic(int value){
-  vexDigitalPinSet(relay, value);
-  shooting = value == kVexDigitalHigh;
-}
+  while (!chThdShouldTerminate()) {
+    // intake motor
+    if (abs(vexControllerGet(Ch2)) > 15)
+      vexMotorSet(intakeMotor, vexControllerGet(Ch2));
+    else
+      vexMotorSet(intakeMotor, 0);
 
-// sets the state of the intake arm
-void setArm(int value){
-  vexDigitalPinSet(arm,value);
+    // toggle intake pneumatic
+    if(!intakeArmToggled && vexControllerGet(Btn6U)){
+      vexDigitalPinSet(intakeArm, 1 - vexDigitalPinGet(intakeArm));
+    }
+    intakeArmToggled = vexControllerGet(Btn6U);
+
+    vexSleep(25);
+  }
+
+  return (msg_t)0;
 }
